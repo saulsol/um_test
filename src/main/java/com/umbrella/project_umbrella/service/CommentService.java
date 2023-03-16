@@ -26,7 +26,15 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
+    
+    // 댓글 조회
+    public List<CommentResponseDto> findComments(CommentRequestDto commentRequestDto, Long postId){
+        PageRequest pageRequest = makePageRequest(commentRequestDto);
+        return returnResponseDtoList(pageRequest, postId);
+    }
+    
+    
+    
     // 댓글 생성
     public List<CommentResponseDto> create(String nickName, Long postId, CommentRequestDto commentRequestDto){
 
@@ -36,7 +44,6 @@ public class CommentService {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("댓글 쓰기 실패: 해당 게시글이 존재하지 않습니다."+ postId)
         );
-
 
         Comment comment = Comment.builder()
                 .content(commentRequestDto.getContent())
@@ -49,24 +56,7 @@ public class CommentService {
         // pageRequest 만들어서 처리
         PageRequest pageRequest = makePageRequest(commentRequestDto);
 
-        List<Comment> commentList = commentRepository.findAllByPost_Id(pageRequest, savedComment.getPost().getId());
-        List<CommentResponseDto> responseDtoList = new ArrayList<>();
-
-        // DTO 변환
-        for (Comment commentEntity : commentList) {
-
-            CommentResponseDto commentResponseDto = new CommentResponseDto(
-                    commentEntity.getId(),
-                    commentEntity.getContent(),
-                    commentEntity.getCreateDate(),
-                    commentEntity.getUser().getNickName()
-            );
-
-            responseDtoList.add(commentResponseDto);
-
-        }
-
-        return responseDtoList;
+       return findComments(commentRequestDto, savedComment.getPost().getId());
     }
 
 
@@ -80,16 +70,20 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
         PageRequest pageRequest = makePageRequest(commentRequestDto);
-        return  returnResponseDtoList(pageRequest, savedComment);
+
+        return findComments(commentRequestDto, savedComment.getPost().getId());
     }
 
 
     // 댓글 삭제
-    public void delete(Long id){
-        Comment comment = commentRepository.findById(id).orElseThrow(
-                ()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."+ id)
+    public List<CommentResponseDto> delete(CommentRequestDto commentRequestDto){
+        Comment comment = commentRepository.findById(commentRequestDto.getId()).orElseThrow(
+                ()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."+ commentRequestDto.getId())
         );
         commentRepository.delete(comment);
+        
+        PageRequest pageRequest = makePageRequest(commentRequestDto);
+        return findComments(commentRequestDto, comment.getPost().getId());
     }
 
 
@@ -104,8 +98,8 @@ public class CommentService {
 
 
 
-    private List<CommentResponseDto> returnResponseDtoList(PageRequest pageRequest, Comment comment){
-        List<Comment> commentList = commentRepository.findAllByPost_Id(pageRequest, comment.getPost().getId());
+    private List<CommentResponseDto> returnResponseDtoList(PageRequest pageRequest, Long postId){
+        List<Comment> commentList = commentRepository.findAllByPost_Id(pageRequest, postId);
 
         List<CommentResponseDto> responseDtoList = new ArrayList<>();
 
