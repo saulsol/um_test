@@ -53,23 +53,20 @@ public class CommentService {
 
         Comment savedComment = commentRepository.save(comment);
 
-        // pageRequest 만들어서 처리
-        PageRequest pageRequest = makePageRequest(commentRequestDto);
-
        return findComments(commentRequestDto, savedComment.getPost().getId());
     }
 
 
     // 댓글 수정
-    public List<CommentResponseDto> update(Long commentId, CommentRequestDto commentRequestDto){
+    public List<CommentResponseDto> update(CommentRequestDto commentRequestDto){
 
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                        ()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."+ commentId)
+        Comment comment = commentRepository.findById(commentRequestDto.getId()).orElseThrow(
+                        ()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."+ commentRequestDto.getId())
                 );
+
         comment.update(commentRequestDto.getContent());
 
         Comment savedComment = commentRepository.save(comment);
-        PageRequest pageRequest = makePageRequest(commentRequestDto);
 
         return findComments(commentRequestDto, savedComment.getPost().getId());
     }
@@ -81,8 +78,6 @@ public class CommentService {
                 ()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."+ commentRequestDto.getId())
         );
         commentRepository.delete(comment);
-        
-        PageRequest pageRequest = makePageRequest(commentRequestDto);
         return findComments(commentRequestDto, comment.getPost().getId());
     }
 
