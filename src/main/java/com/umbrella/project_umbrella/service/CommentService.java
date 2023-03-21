@@ -14,7 +14,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,6 @@ public class CommentService {
     
     // 댓글 생성
     public List<CommentResponseDto> create(String nickName, Long postId, CommentRequestDto commentRequestDto){
-
 
         User user = userRepository.findByNickName(nickName); // Long id 로 변경
 
@@ -92,8 +90,8 @@ public class CommentService {
     }
 
 
-
-    private List<CommentResponseDto> returnResponseDtoList(PageRequest pageRequest, Long postId){
+    @Transactional(readOnly = true)
+    public List<CommentResponseDto> returnResponseDtoList(PageRequest pageRequest, Long postId){
         List<Comment> commentList = commentRepository.findAllByPost_Id(pageRequest, postId);
 
         List<CommentResponseDto> responseDtoList = new ArrayList<>();
