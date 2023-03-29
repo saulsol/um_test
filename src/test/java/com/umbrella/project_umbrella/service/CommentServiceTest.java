@@ -62,20 +62,35 @@ class CommentServiceTest {
 
         CommentRequestDto commentRequestDto = CommentRequestDto
                 .builder()
-                .id(2L)
+                .id(1L)
                 .content("s")
                 .pageNumber(0)
                 .build();
 
-        List<CommentResponseDto> commentList = commentService.save(user.getNickName(), post1.getId(), commentRequestDto);
+        CommentRequestDto commentRequestDto2 = CommentRequestDto
+                .builder()
+                .id(2L)
+                .content("ss")
+                .pageNumber(0)
+                .build();
 
-        for (CommentResponseDto commentResponseDto : commentList) {
-            System.out.println("commentResponseDto = " + commentResponseDto);
+
+        commentService.create(user.getNickName(), post1.getId(), commentRequestDto);
+        commentService.create(user.getNickName(), post1.getId(), commentRequestDto2);
+
+        List<CommentResponseDto> responseDtos = commentService.delete(commentRequestDto);
+
+        for (CommentResponseDto responseDto : responseDtos) {
+            System.out.println("---------------------------------------");
+            System.out.println(responseDto);
         }
 
+
+        
+        
+        }
 
     }
 
 
 
-}
